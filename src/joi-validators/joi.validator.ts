@@ -6,7 +6,10 @@ export const schemaCreate = Joi.object().keys({
     "string.max": "name has to be less than 30 characters",
   }),
   email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
+    .pattern(new RegExp("@gmail.com$"))
+    .messages({
+      "string.pattern.base": "you don't match the pattern email@gmail.com",
+    })
     .required(),
   password: Joi.string()
     .alphanum()
@@ -22,7 +25,7 @@ export const schemaCreate = Joi.object().keys({
     .max(120)
     .messages({
       "number.min": "age has to be at least 1",
-      "number.max": "name has to be less than 120",
+      "number.max": "age has to be less than 120",
     })
     .required(),
 });
@@ -32,5 +35,12 @@ export const schemaUpdate = Joi.object({
     "string.min": "name has to be at least 3 characters",
     "string.max": "name has to be less than 30 characters",
   }),
-  age: Joi.number().min(1).max(120).required(),
+  age: Joi.number()
+    .min(1)
+    .max(120)
+    .messages({
+      "number.min": "age has to be at least 1",
+      "number.max": "age has to be less than 120",
+    })
+    .required(),
 });

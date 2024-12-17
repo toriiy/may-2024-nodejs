@@ -25,7 +25,10 @@ class CommonMiddleware {
       try {
         if (key === "create") {
           const body = req.body as IUserIncomplete;
-          schemaCreate.validate(body);
+          const { error } = schemaCreate.validate(body);
+          if (error) {
+            throw new ApiError(error.message, 400);
+          }
         }
 
         if (key === "update") {
@@ -33,7 +36,10 @@ class CommonMiddleware {
           if (body.email || body.password) {
             throw new ApiError("You can update only name and age", 400);
           }
-          schemaUpdate.validate(body);
+          const { error } = schemaUpdate.validate(body);
+          if (error) {
+            throw new ApiError(error.message, 400);
+          }
         }
         next();
       } catch (e) {
