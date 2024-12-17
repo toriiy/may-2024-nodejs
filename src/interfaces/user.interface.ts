@@ -12,4 +12,7 @@ export interface IUser {
   updatedAt: Date;
 }
 
-export type IUserIncomplete = Pick<IUser, "name" | "email" | "password">;
+export type IUserIncomplete = Pick<
+  IUser,
+  "name" | "email" | "password" | "age"
+>;
