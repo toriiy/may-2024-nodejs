@@ -3,7 +3,7 @@ import { isObjectIdOrHexString } from "mongoose";
 
 import { ApiError } from "../errors/api.error";
 import { IUserIncomplete } from "../interfaces/user.interface";
-import { schemaCreate, schemaUpdate } from "../joi-validators/joi.validator";
+import { userValidator } from "../joi-validators/joi.validator";
 
 class CommonMiddleware {
   public isIdValid(key: string) {
@@ -25,7 +25,7 @@ class CommonMiddleware {
       try {
         if (key === "create") {
           const body = req.body as IUserIncomplete;
-          const { error } = schemaCreate.validate(body);
+          const { error } = userValidator.schemaCreate.validate(body);
           if (error) {
             throw new ApiError(error.message, 400);
           }
@@ -36,7 +36,7 @@ class CommonMiddleware {
           if (body.email || body.password) {
             throw new ApiError("You can update only name and age", 400);
           }
-          const { error } = schemaUpdate.validate(body);
+          const { error } = userValidator.schemaUpdate.validate(body);
           if (error) {
             throw new ApiError(error.message, 400);
           }

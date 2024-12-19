@@ -1,3 +1,4 @@
+import { ApiError } from "../errors/api.error";
 import { IUser, IUserIncomplete } from "../interfaces/user.interface";
 import { userRepository } from "../repositories/user.repository";
 
@@ -6,8 +7,11 @@ class UserService {
     return await userRepository.getList();
   }
 
-  public async create(user: IUserIncomplete): Promise<IUser> {
-    return await userRepository.create(user);
+  public async isEmailUnique(email: string): Promise<void> {
+    const user = await userRepository.getByEmail(email);
+    if (user) {
+      throw new ApiError("Email is already in use", 409);
+    }
   }
 
   public async getById(userId: string): Promise<IUser> {
@@ -15,7 +19,7 @@ class UserService {
   }
 
   public async deleteById(userId: string): Promise<void> {
-    return await userRepository.deleteById(userId);
+    await userRepository.deleteById(userId);
   }
 
   public async updateById(

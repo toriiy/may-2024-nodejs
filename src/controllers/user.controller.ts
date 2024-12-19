@@ -13,16 +13,6 @@ class UserController {
     }
   }
 
-  public async create(req: Request, res: Response, next: NextFunction) {
-    try {
-      const user = req.body as IUserIncomplete;
-      const result = await userService.create(user);
-      res.status(201).json(result);
-    } catch (e) {
-      next(e);
-    }
-  }
-
   public async getById(req: Request, res: Response, next: NextFunction) {
     try {
       const userId = req.params.userId;
