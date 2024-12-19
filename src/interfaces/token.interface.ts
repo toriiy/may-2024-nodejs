@@ -14,3 +14,7 @@ export interface ITokenPayload {
   role: RoleEnum;
 }
 export type ITokenPair = Pick<IToken, "accessToken" | "refreshToken">;
+
+export interface ITokenPairWithUserId extends ITokenPair {
+  _userId: string;
+}

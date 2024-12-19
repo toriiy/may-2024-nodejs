@@ -16,7 +16,10 @@ class TokenService {
     return { accessToken, refreshToken };
   }
 
-  public validateToken(token: string, type: "access" | "refresh") {
+  public validateToken(
+    token: string,
+    type: "access" | "refresh",
+  ): ITokenPayload {
     try {
       let secret: string;
       switch (type) {

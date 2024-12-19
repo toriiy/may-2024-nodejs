@@ -1,5 +1,5 @@
 import { ApiError } from "../errors/api.error";
-import { ITokenPair } from "../interfaces/token.interface";
+import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import { IUser, IUserIncomplete } from "../interfaces/user.interface";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
@@ -22,7 +22,9 @@ class AuthService {
     return { user, tokens };
   }
 
-  public async login(body: any): Promise<{ user: IUser; tokens: ITokenPair }> {
+  public async login(
+    body: Partial<IUserIncomplete>,
+  ): Promise<{ user: IUser; tokens: ITokenPair }> {
     const user = await userRepository.getByEmail(body.email);
     if (!user) {
       throw new ApiError("invalid email or password", 400);
@@ -40,6 +42,22 @@ class AuthService {
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
     return { user, tokens };
+  }
+
+  public async refresh(
+    refreshTokenPayload: ITokenPayload,
+  ): Promise<ITokenPair> {
+    const user = await userRepository.getById(refreshTokenPayload.userId);
+    await tokenRepository.deleteByUserId(user._id);
+    const tokens = tokenService.generateToken({
+      userId: user._id,
+      role: user.role,
+    });
+    await tokenRepository.create({
+      ...tokens,
+      _userId: user._id,
+    });
+    return tokens;
   }
 }
 

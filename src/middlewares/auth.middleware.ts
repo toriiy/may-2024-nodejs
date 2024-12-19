@@ -9,15 +9,15 @@ class AuthMiddleware {
     req: Request,
     res: Response,
     next: NextFunction,
-  ) {
+  ): Promise<void> {
     try {
       const header = req.headers.authorization;
       if (!header) {
-        throw new ApiError("No token provided", 401);
+        throw new ApiError("No access token provided", 401);
       }
       const accessToken = header.split("Bearer ")[1];
       if (!accessToken) {
-        throw new ApiError("No token provided", 401);
+        throw new ApiError("No access token provided", 401);
       }
 
       const tokenPayload = tokenService.validateToken(accessToken, "access");
@@ -26,6 +26,32 @@ class AuthMiddleware {
         throw new ApiError("Invalid token", 401);
       }
       req.res.locals.tokenPayload = tokenPayload;
+      next();
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async checkRefreshToken(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const header = req.headers.authorization;
+      if (!header) {
+        throw new ApiError("No refresh token provided", 401);
+      }
+      const refreshToken = header.split("Bearer ")[1];
+      if (!refreshToken) {
+        throw new ApiError("No refresh token provided", 401);
+      }
+      const tokenPayload = tokenService.validateToken(refreshToken, "refresh");
+      const pair = await tokenRepository.findByParams({ refreshToken });
+      if (!pair) {
+        throw new ApiError("Invalid token", 401);
+      }
+      req.res.locals.refreshTokenPayload = tokenPayload;
       next();
     } catch (e) {
       next(e);

@@ -33,9 +33,6 @@ class CommonMiddleware {
 
         if (key === "update") {
           const body = req.body as Partial<IUserIncomplete>;
-          if (body.email || body.password) {
-            throw new ApiError("You can update only name and age", 400);
-          }
           const { error } = userValidator.schemaUpdate.validate(body);
           if (error) {
             throw new ApiError(error.message, 400);
@@ -46,6 +43,19 @@ class CommonMiddleware {
         next(e);
       }
     };
+  }
+
+  public isLoginBodyValid(req: Request, res: Response, next: NextFunction) {
+    try {
+      const body = req.body as Partial<IUserIncomplete>;
+      const { error } = userValidator.schemaLogin.validate(body);
+      if (error) {
+        throw new ApiError(error.message, 400);
+      }
+      next();
+    } catch (e) {
+      next(e);
+    }
   }
 }
 export const commonMiddleware = new CommonMiddleware();

@@ -13,21 +13,19 @@ class UserRepository {
   public async getByEmail(email: string): Promise<IUser> {
     return await User.findOne({ email });
   }
-  public async getById(userId: string): Promise<IUser> {
-    return await User.findById(userId);
-  }
 
-  public async deleteById(userId: string): Promise<void> {
+  public async deleteMe(userId: string): Promise<void> {
     await User.findByIdAndDelete(userId);
   }
 
-  public async updateById(
-    userId: string,
-    body: IUserIncomplete,
-  ): Promise<IUser> {
+  public async updateMe(userId: string, body: IUserIncomplete): Promise<IUser> {
     return await User.findByIdAndUpdate(userId, body, {
       returnDocument: "after",
     });
+  }
+
+  public async getById(userId: string): Promise<IUser> {
+    return await User.findById(userId);
   }
 }
 
