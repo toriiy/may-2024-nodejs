@@ -20,9 +20,13 @@ router.post(
   authController.refresh,
 );
 
-router.post("/logout", authMiddleware.checkAccessToken, authController.logout);
+router.delete(
+  "/logout",
+  authMiddleware.checkAccessToken,
+  authController.logout,
+);
 
-router.post(
+router.delete(
   "/logout/all",
   authMiddleware.checkAccessToken,
   authController.logoutAll,

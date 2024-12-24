@@ -20,11 +20,10 @@ class AuthService {
       role: user.role,
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
-    await emailService.sendEmail(
-      EmailTypeEnum.WELCOME,
-      "vikaizhak54@gmail.com",
-      { name: user.name, frontUrl: config.frontUrl },
-    );
+    await emailService.sendEmail(EmailTypeEnum.WELCOME, body.email, {
+      name: user.name,
+      frontUrl: config.frontUrl,
+    });
     return { user, tokens };
   }
 
@@ -66,8 +65,15 @@ class AuthService {
     return tokens;
   }
 
-  public async logout(accessToken: string): Promise<void> {
+  public async logout(
+    accessToken: string,
+    tokenPayload: ITokenPayload,
+  ): Promise<void> {
+    const user = await userRepository.getById(tokenPayload.userId);
     await tokenRepository.deleteByParams({ accessToken });
+    await emailService.sendEmail(EmailTypeEnum.LOG_OUT, user.email, {
+      name: user.name,
+    });
   }
 
   public async logoutAll(tokenPayload: ITokenPayload): Promise<void> {

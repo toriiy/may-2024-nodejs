@@ -59,15 +59,16 @@ class CommonMiddleware {
     }
   }
 
-  public async isEmailUnique(
-    req: Request,
-    res: Response,
-    next: NextFunction,
-  ): Promise<void> {
-    const { email } = req.body;
-    const user = await userRepository.getByEmail(email);
-    if (user) {
-      throw new ApiError("Email is already in use", 409);
+  public async isEmailUnique(req: Request, res: Response, next: NextFunction) {
+    try {
+      const email = req.body.email as string;
+      const user = await userRepository.getByEmail(email);
+      if (user) {
+        throw new ApiError("Email is already in use", 409);
+      }
+      next();
+    } catch (e) {
+      next(e);
     }
   }
 }

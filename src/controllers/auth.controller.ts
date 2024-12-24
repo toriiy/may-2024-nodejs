@@ -43,7 +43,8 @@ class AuthController {
   public async logout(req: Request, res: Response, next: NextFunction) {
     try {
       const accessToken = req.res.locals.accessToken as string;
-      await authService.logout(accessToken);
+      const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
+      await authService.logout(accessToken, tokenPayload);
       res.sendStatus(204);
     } catch (e) {
       next(e);
