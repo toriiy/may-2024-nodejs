@@ -8,13 +8,6 @@ class UserService {
     return await userRepository.getList();
   }
 
-  public async isEmailUnique(email: string): Promise<void> {
-    const user = await userRepository.getByEmail(email);
-    if (user) {
-      throw new ApiError("Email is already in use", 409);
-    }
-  }
-
   public async getMe(tokenPayload: ITokenPayload): Promise<IUser> {
     const user = await userRepository.getById(tokenPayload.userId);
     if (!user) {

@@ -1,17 +1,18 @@
+import { config } from "../configs/config";
+import { EmailTypeEnum } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api.error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import { IUser, IUserIncomplete } from "../interfaces/user.interface";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
+import { emailService } from "./email.service";
 import { passwordService } from "./password.service";
 import { tokenService } from "./token.service";
-import { userService } from "./user.service";
 
 class AuthService {
   public async register(
     body: IUserIncomplete,
   ): Promise<{ user: IUser; tokens: ITokenPair }> {
-    await userService.isEmailUnique(body.email);
     const password = await passwordService.hashPassword(body.password);
     const user = await userRepository.create({ ...body, password });
     const tokens = tokenService.generateToken({
@@ -19,6 +20,11 @@ class AuthService {
       role: user.role,
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
+    await emailService.sendEmail(
+      EmailTypeEnum.WELCOME,
+      "vikaizhak54@gmail.com",
+      { name: user.name, frontUrl: config.frontUrl },
+    );
     return { user, tokens };
   }
 
@@ -46,18 +52,26 @@ class AuthService {
 
   public async refresh(
     refreshTokenPayload: ITokenPayload,
+    refreshToken: string,
   ): Promise<ITokenPair> {
-    const user = await userRepository.getById(refreshTokenPayload.userId);
-    await tokenRepository.deleteByUserId(user._id);
+    await tokenRepository.deleteByParams({ refreshToken });
     const tokens = tokenService.generateToken({
-      userId: user._id,
-      role: user.role,
+      userId: refreshTokenPayload.userId,
+      role: refreshTokenPayload.role,
     });
     await tokenRepository.create({
       ...tokens,
-      _userId: user._id,
+      _userId: refreshTokenPayload.userId,
     });
     return tokens;
+  }
+
+  public async logout(accessToken: string): Promise<void> {
+    await tokenRepository.deleteByParams({ accessToken });
+  }
+
+  public async logoutAll(tokenPayload: ITokenPayload): Promise<void> {
+    await tokenRepository.deleteAll(tokenPayload.userId);
   }
 }
 

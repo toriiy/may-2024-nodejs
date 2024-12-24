@@ -4,6 +4,7 @@ import { isObjectIdOrHexString } from "mongoose";
 import { ApiError } from "../errors/api.error";
 import { IUserIncomplete } from "../interfaces/user.interface";
 import { userValidator } from "../joi-validators/joi.validator";
+import { userRepository } from "../repositories/user.repository";
 
 class CommonMiddleware {
   public isIdValid(key: string) {
@@ -55,6 +56,18 @@ class CommonMiddleware {
       next();
     } catch (e) {
       next(e);
+    }
+  }
+
+  public async isEmailUnique(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    const { email } = req.body;
+    const user = await userRepository.getByEmail(email);
+    if (user) {
+      throw new ApiError("Email is already in use", 409);
     }
   }
 }

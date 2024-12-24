@@ -29,8 +29,36 @@ class AuthController {
     try {
       const refreshTokenPayload = req.res.locals
         .refreshTokenPayload as ITokenPayload;
-      const result = await authService.refresh(refreshTokenPayload);
+      const refreshToken = req.res.locals.refreshToken as string;
+      const result = await authService.refresh(
+        refreshTokenPayload,
+        refreshToken,
+      );
       res.json(result);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      const accessToken = req.res.locals.accessToken as string;
+      await authService.logout(accessToken);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async logoutAll(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ): Promise<void> {
+    try {
+      const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
+      await authService.logoutAll(tokenPayload);
+      res.sendStatus(204);
     } catch (e) {
       next(e);
     }
