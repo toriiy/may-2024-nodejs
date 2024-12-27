@@ -59,4 +59,13 @@ export class userValidator {
       })
       .required(),
   });
+
+  public static schemaForgotPassword = Joi.object({
+    email: Joi.string()
+      .regex(regexConstant.email)
+      .messages({
+        "string.pattern.base": "you don't match the pattern test@gmail.com",
+      })
+      .required(),
+  });
 }

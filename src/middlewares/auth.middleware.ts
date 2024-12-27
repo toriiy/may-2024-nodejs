@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 
+import { TokenTypeEnum } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api.error";
 import { tokenRepository } from "../repositories/token.repository";
 import { tokenService } from "../services/token.service";
@@ -20,7 +21,10 @@ class AuthMiddleware {
         throw new ApiError("No access token provided", 401);
       }
 
-      const tokenPayload = tokenService.validateToken(accessToken, "access");
+      const tokenPayload = tokenService.validateToken(
+        accessToken,
+        TokenTypeEnum.ACCESS,
+      );
       const pair = await tokenRepository.findByParams({ accessToken });
       if (!pair) {
         throw new ApiError("Invalid token", 401);
@@ -47,7 +51,10 @@ class AuthMiddleware {
       if (!refreshToken) {
         throw new ApiError("No refresh token provided", 401);
       }
-      const tokenPayload = tokenService.validateToken(refreshToken, "refresh");
+      const tokenPayload = tokenService.validateToken(
+        refreshToken,
+        TokenTypeEnum.REFRESH,
+      );
       const pair = await tokenRepository.findByParams({ refreshToken });
       if (!pair) {
         throw new ApiError("Invalid token", 401);

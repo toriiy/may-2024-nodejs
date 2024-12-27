@@ -1,7 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 
 import { ITokenPayload } from "../interfaces/token.interface";
-import { IUserIncomplete } from "../interfaces/user.interface";
+import {
+  IForgotPassword,
+  ISetForgotPassword,
+  IUserIncomplete,
+} from "../interfaces/user.interface";
 import { authService } from "../services/auth.service";
 
 class AuthController {
@@ -60,6 +64,30 @@ class AuthController {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
       await authService.logoutAll(tokenPayload);
       res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async forgotPassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const body = req.body as IForgotPassword;
+      await authService.forgotPassword(body);
+      res.sendStatus(201);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async SetForgotPassword(
+    req: Request,
+    res: Response,
+    next: NextFunction,
+  ) {
+    try {
+      const body = req.body as ISetForgotPassword;
+      await authService.SetForgotPassword(body);
+      res.sendStatus(201);
     } catch (e) {
       next(e);
     }

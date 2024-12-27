@@ -32,4 +32,12 @@ router.delete(
   authController.logoutAll,
 );
 
+router.post(
+  "/forgot-password",
+  commonMiddleware.isBodyValid("forgot-password"),
+  authController.forgotPassword,
+);
+
+router.put("/forgot-password", authController.SetForgotPassword);
+
 export const authRouter = router;

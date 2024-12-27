@@ -1,8 +1,15 @@
 import { config } from "../configs/config";
+import { ActionTokenTypeEnum } from "../enums/action-token-type.enum";
 import { EmailTypeEnum } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api.error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
-import { IUser, IUserIncomplete } from "../interfaces/user.interface";
+import {
+  IForgotPassword,
+  ISetForgotPassword,
+  IUser,
+  IUserIncomplete,
+} from "../interfaces/user.interface";
+import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -78,6 +85,43 @@ class AuthService {
 
   public async logoutAll(tokenPayload: ITokenPayload): Promise<void> {
     await tokenRepository.deleteAll(tokenPayload.userId);
+  }
+
+  public async forgotPassword(body: IForgotPassword): Promise<void> {
+    const user = await userRepository.getByEmail(body.email);
+    if (!user) return;
+    const token = tokenService.generateActionToken(
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      ActionTokenTypeEnum.FORGOT_PASSWORD,
+    );
+    await actionTokenRepository.create({
+      _userId: user._id,
+      token,
+      type: ActionTokenTypeEnum.FORGOT_PASSWORD,
+    });
+    await emailService.sendEmail(EmailTypeEnum.FORGOT_PASSWORD, body.email, {
+      name: user.name,
+      frontUrl: config.frontUrl,
+      actionToken: token,
+    });
+  }
+
+  public async SetForgotPassword(body: ISetForgotPassword): Promise<void> {
+    const payload = tokenService.validateToken(
+      body.token,
+      ActionTokenTypeEnum.FORGOT_PASSWORD,
+    );
+    const entity = await actionTokenRepository.findByParams({
+      token: body.token,
+    });
+    if (!entity) {
+      throw new ApiError("Invalid token", 401);
+    }
+    const password = await passwordService.hashPassword(body.password);
+    await userRepository.updateMe(payload.userId, { password });
   }
 }
 

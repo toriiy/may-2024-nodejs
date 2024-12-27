@@ -18,3 +18,7 @@ export type IUserIncomplete = Pick<
   IUser,
   "name" | "email" | "password" | "age"
 >;
+
+export type IForgotPassword = Pick<IUser, "email">;
+
+export type ISetForgotPassword = Pick<IUser, "password"> & { token: string };

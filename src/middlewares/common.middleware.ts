@@ -39,6 +39,14 @@ class CommonMiddleware {
             throw new ApiError(error.message, 400);
           }
         }
+
+        if (key === "forgot-password") {
+          const body = req.body as Partial<IUserIncomplete>;
+          const { error } = userValidator.schemaForgotPassword.validate(body);
+          if (error) {
+            throw new ApiError(error.message, 400);
+          }
+        }
         next();
       } catch (e) {
         next(e);

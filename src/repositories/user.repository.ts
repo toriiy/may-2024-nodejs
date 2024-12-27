@@ -18,7 +18,7 @@ class UserRepository {
     await User.findByIdAndDelete(userId);
   }
 
-  public async updateMe(userId: string, body: IUserIncomplete): Promise<IUser> {
+  public async updateMe(userId: string, body: Partial<IUser>): Promise<IUser> {
     return await User.findByIdAndUpdate(userId, body, {
       returnDocument: "after",
     });
