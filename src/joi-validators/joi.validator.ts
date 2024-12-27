@@ -68,4 +68,21 @@ export class userValidator {
       })
       .required(),
   });
+
+  public static schemaSetForgotPassword = Joi.object({
+    token: Joi.string().required(),
+    password: Joi.string()
+      .regex(regexConstant.password)
+      .messages({
+        "string.pattern.base":
+          " password must contain eight characters including one uppercase letter, " +
+          "one lowercase letter, and one number or special character",
+      })
+      .required(),
+  });
+
+  public static schemaVerifyEmail = Joi.object({
+    token: Joi.string().required(),
+    isVerified: Joi.boolean().required(),
+  });
 }

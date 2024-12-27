@@ -1,7 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 
+import { ActionTokenTypeEnum } from "../enums/action-token-type.enum";
 import { TokenTypeEnum } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api.error";
+import { ISetForgotPassword, IVerifyEmail } from "../interfaces/user.interface";
+import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { tokenService } from "../services/token.service";
 
@@ -65,6 +68,25 @@ class AuthMiddleware {
     } catch (e) {
       next(e);
     }
+  }
+
+  public checkActionToken(tokenType: ActionTokenTypeEnum) {
+    return async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const body = req.body as ISetForgotPassword | IVerifyEmail;
+        const payload = tokenService.validateToken(body.token, tokenType);
+        const entity = await actionTokenRepository.findByParams({
+          token: body.token,
+        });
+        if (!entity) {
+          throw new ApiError("Invalid token", 401);
+        }
+        req.res.locals.payload = payload;
+        next();
+      } catch (e) {
+        next(e);
+      }
+    };
   }
 }
 

@@ -1,6 +1,7 @@
 import { ApiError } from "../errors/api.error";
 import { ITokenPayload } from "../interfaces/token.interface";
 import { IUser, IUserIncomplete } from "../interfaces/user.interface";
+import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 
 class UserService {
@@ -22,6 +23,7 @@ class UserService {
       throw new ApiError("User not found", 404);
     }
     await userRepository.deleteMe(user._id);
+    await tokenRepository.deleteAll(tokenPayload.userId);
   }
 
   public async updateMe(

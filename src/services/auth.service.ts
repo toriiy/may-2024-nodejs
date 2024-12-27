@@ -8,6 +8,7 @@ import {
   ISetForgotPassword,
   IUser,
   IUserIncomplete,
+  IVerifyEmail,
 } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
@@ -27,9 +28,22 @@ class AuthService {
       role: user.role,
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
+    const token = tokenService.generateActionToken(
+      {
+        userId: user._id,
+        role: user.role,
+      },
+      ActionTokenTypeEnum.EMAIL_VERIFICATION,
+    );
+    await actionTokenRepository.create({
+      _userId: user._id,
+      token,
+      type: ActionTokenTypeEnum.EMAIL_VERIFICATION,
+    });
     await emailService.sendEmail(EmailTypeEnum.WELCOME, body.email, {
       name: user.name,
       frontUrl: config.frontUrl,
+      actionToken: token,
     });
     return { user, tokens };
   }
@@ -109,19 +123,27 @@ class AuthService {
     });
   }
 
-  public async SetForgotPassword(body: ISetForgotPassword): Promise<void> {
-    const payload = tokenService.validateToken(
-      body.token,
-      ActionTokenTypeEnum.FORGOT_PASSWORD,
-    );
-    const entity = await actionTokenRepository.findByParams({
-      token: body.token,
-    });
-    if (!entity) {
-      throw new ApiError("Invalid token", 401);
-    }
+  public async SetForgotPassword(
+    payload: ITokenPayload,
+    body: ISetForgotPassword,
+  ): Promise<void> {
     const password = await passwordService.hashPassword(body.password);
     await userRepository.updateMe(payload.userId, { password });
+
+    await Promise.all([
+      actionTokenRepository.deleteByParams({ token: body.token }),
+      tokenRepository.deleteAll(payload.userId),
+    ]);
+  }
+
+  public async verifyEmail(
+    payload: ITokenPayload,
+    body: IVerifyEmail,
+  ): Promise<void> {
+    await userRepository.updateMe(payload.userId, {
+      isVerified: body.isVerified,
+    });
+    await actionTokenRepository.deleteByParams({ token: body.token });
   }
 }
 

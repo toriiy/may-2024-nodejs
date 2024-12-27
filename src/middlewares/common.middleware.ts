@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { ObjectSchema } from "joi";
 import { isObjectIdOrHexString } from "mongoose";
 
 import { ApiError } from "../errors/api.error";
@@ -21,35 +22,13 @@ class CommonMiddleware {
     };
   }
 
-  public isBodyValid(key: string) {
-    return (req: Request, res: Response, next: NextFunction) => {
+  public isBodyValid(validator: ObjectSchema) {
+    return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        if (key === "create") {
-          const body = req.body as IUserIncomplete;
-          const { error } = userValidator.schemaCreate.validate(body);
-          if (error) {
-            throw new ApiError(error.message, 400);
-          }
-        }
-
-        if (key === "update") {
-          const body = req.body as Partial<IUserIncomplete>;
-          const { error } = userValidator.schemaUpdate.validate(body);
-          if (error) {
-            throw new ApiError(error.message, 400);
-          }
-        }
-
-        if (key === "forgot-password") {
-          const body = req.body as Partial<IUserIncomplete>;
-          const { error } = userValidator.schemaForgotPassword.validate(body);
-          if (error) {
-            throw new ApiError(error.message, 400);
-          }
-        }
+        req.body = await validator.validateAsync(req.body);
         next();
       } catch (e) {
-        next(e);
+        next(new ApiError(e.details[0].message, 400));
       }
     };
   }

@@ -5,6 +5,7 @@ import {
   IForgotPassword,
   ISetForgotPassword,
   IUserIncomplete,
+  IVerifyEmail,
 } from "../interfaces/user.interface";
 import { authService } from "../services/auth.service";
 
@@ -85,8 +86,20 @@ class AuthController {
     next: NextFunction,
   ) {
     try {
+      const payload = req.res.locals.payload as ITokenPayload;
       const body = req.body as ISetForgotPassword;
-      await authService.SetForgotPassword(body);
+      await authService.SetForgotPassword(payload, body);
+      res.sendStatus(201);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async verifyEmail(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = req.res.locals.payload as ITokenPayload;
+      const body = req.body as IVerifyEmail;
+      await authService.verifyEmail(payload, body);
       res.sendStatus(201);
     } catch (e) {
       next(e);

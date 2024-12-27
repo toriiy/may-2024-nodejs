@@ -1,4 +1,3 @@
-// import * as bcrypt from "bcrypt";
 import * as jwt from "jsonwebtoken";
 
 import { config } from "../configs/config";

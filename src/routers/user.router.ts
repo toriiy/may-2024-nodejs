@@ -1,6 +1,7 @@
 import { Router } from "express";
 
 import { userController } from "../controllers/user.controller";
+import { userValidator } from "../joi-validators/joi.validator";
 import { authMiddleware } from "../middlewares/auth.middleware";
 import { commonMiddleware } from "../middlewares/common.middleware";
 
@@ -15,7 +16,7 @@ router.delete("/me", authMiddleware.checkAccessToken, userController.deleteMe);
 router.put(
   "/me",
   authMiddleware.checkAccessToken,
-  commonMiddleware.isBodyValid("update"),
+  commonMiddleware.isBodyValid(userValidator.schemaUpdate),
   userController.updateMe,
 );
 
