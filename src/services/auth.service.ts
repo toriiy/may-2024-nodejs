@@ -4,6 +4,7 @@ import { EmailTypeEnum } from "../enums/email-type.enum";
 import { ApiError } from "../errors/api.error";
 import { ITokenPair, ITokenPayload } from "../interfaces/token.interface";
 import {
+  IChangePassword,
   IForgotPassword,
   ISetForgotPassword,
   IUser,
@@ -144,6 +145,23 @@ class AuthService {
       isVerified: body.isVerified,
     });
     await actionTokenRepository.deleteByParams({ token: body.token });
+  }
+
+  public async changePassword(
+    body: IChangePassword,
+    payload: ITokenPayload,
+  ): Promise<void> {
+    const user = await userRepository.getById(payload.userId);
+    const isPasswordCorrect = await passwordService.comparePassword(
+      body.oldPassword,
+      user.password,
+    );
+    if (!isPasswordCorrect) {
+      throw new ApiError("Password is incorrect", 400);
+    }
+    const password = await passwordService.hashPassword(body.newPassword);
+    await userRepository.updateMe(payload.userId, { password });
+    await tokenRepository.deleteAll(payload.userId);
   }
 }
 

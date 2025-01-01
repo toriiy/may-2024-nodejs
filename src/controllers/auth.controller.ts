@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from "express";
 
 import { ITokenPayload } from "../interfaces/token.interface";
 import {
+  IChangePassword,
   IForgotPassword,
   ISetForgotPassword,
   IUserIncomplete,
@@ -74,7 +75,7 @@ class AuthController {
     try {
       const body = req.body as IForgotPassword;
       await authService.forgotPassword(body);
-      res.sendStatus(201);
+      res.sendStatus(204);
     } catch (e) {
       next(e);
     }
@@ -89,7 +90,7 @@ class AuthController {
       const payload = req.res.locals.payload as ITokenPayload;
       const body = req.body as ISetForgotPassword;
       await authService.SetForgotPassword(payload, body);
-      res.sendStatus(201);
+      res.sendStatus(204);
     } catch (e) {
       next(e);
     }
@@ -100,7 +101,18 @@ class AuthController {
       const payload = req.res.locals.payload as ITokenPayload;
       const body = req.body as IVerifyEmail;
       await authService.verifyEmail(payload, body);
-      res.sendStatus(201);
+      res.sendStatus(204);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async changePassword(req: Request, res: Response, next: NextFunction) {
+    try {
+      const payload = req.res.locals.payload as ITokenPayload;
+      const body = req.body as IChangePassword;
+      await authService.changePassword(body, payload);
+      res.sendStatus(204);
     } catch (e) {
       next(e);
     }

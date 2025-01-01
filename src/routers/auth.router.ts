@@ -35,16 +35,23 @@ router.delete(
 );
 
 router.post(
-  "/forgot-password",
+  "/password/forgot",
   commonMiddleware.isBodyValid(userValidator.schemaForgotPassword),
   authController.forgotPassword,
 );
 
 router.put(
-  "/forgot-password",
+  "/password/forgot",
   authMiddleware.checkActionToken(ActionTokenTypeEnum.FORGOT_PASSWORD),
   commonMiddleware.isBodyValid(userValidator.schemaSetForgotPassword),
   authController.SetForgotPassword,
+);
+
+router.put(
+  "/password/change",
+  authMiddleware.checkAccessToken,
+  commonMiddleware.isBodyValid(userValidator.schemaChangePassword),
+  authController.changePassword,
 );
 
 router.put(

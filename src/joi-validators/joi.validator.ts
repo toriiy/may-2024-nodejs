@@ -85,4 +85,23 @@ export class userValidator {
     token: Joi.string().required(),
     isVerified: Joi.boolean().required(),
   });
+
+  public static schemaChangePassword = Joi.object({
+    oldPassword: Joi.string()
+      .regex(regexConstant.password)
+      .messages({
+        "string.pattern.base":
+          " password must contain eight characters including one uppercase letter, " +
+          "one lowercase letter, and one number or special character",
+      })
+      .required(),
+    newPassword: Joi.string()
+      .regex(regexConstant.password)
+      .messages({
+        "string.pattern.base":
+          " password must contain eight characters including one uppercase letter, " +
+          "one lowercase letter, and one number or special character",
+      })
+      .required(),
+  });
 }

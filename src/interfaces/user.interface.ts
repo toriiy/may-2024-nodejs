@@ -24,3 +24,8 @@ export type IForgotPassword = Pick<IUser, "email">;
 export type ISetForgotPassword = Pick<IUser, "password"> & { token: string };
 
 export type IVerifyEmail = Pick<IUser, "isVerified"> & { token: string };
+
+export interface IChangePassword {
+  oldPassword: string;
+  newPassword: string;
+}
