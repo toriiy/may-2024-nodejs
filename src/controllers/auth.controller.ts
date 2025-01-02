@@ -6,7 +6,6 @@ import {
   IForgotPassword,
   ISetForgotPassword,
   IUserIncomplete,
-  IVerifyEmail,
 } from "../interfaces/user.interface";
 import { authService } from "../services/auth.service";
 
@@ -89,7 +88,8 @@ class AuthController {
     try {
       const payload = req.res.locals.payload as ITokenPayload;
       const body = req.body as ISetForgotPassword;
-      await authService.SetForgotPassword(payload, body);
+      const actionToken = req.res.locals.actionToken as string;
+      await authService.SetForgotPassword(payload, body, actionToken);
       res.sendStatus(204);
     } catch (e) {
       next(e);
@@ -99,8 +99,8 @@ class AuthController {
   public async verifyEmail(req: Request, res: Response, next: NextFunction) {
     try {
       const payload = req.res.locals.payload as ITokenPayload;
-      const body = req.body as IVerifyEmail;
-      await authService.verifyEmail(payload, body);
+      const actionToken = req.res.locals.actionToken as string;
+      await authService.verifyEmail(payload, actionToken);
       res.sendStatus(204);
     } catch (e) {
       next(e);
@@ -109,7 +109,7 @@ class AuthController {
 
   public async changePassword(req: Request, res: Response, next: NextFunction) {
     try {
-      const payload = req.res.locals.payload as ITokenPayload;
+      const payload = req.res.locals.tokenPayload as ITokenPayload;
       const body = req.body as IChangePassword;
       await authService.changePassword(body, payload);
       res.sendStatus(204);

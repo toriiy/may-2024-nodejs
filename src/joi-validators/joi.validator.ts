@@ -70,7 +70,6 @@ export class userValidator {
   });
 
   public static schemaSetForgotPassword = Joi.object({
-    token: Joi.string().required(),
     password: Joi.string()
       .regex(regexConstant.password)
       .messages({
@@ -79,11 +78,6 @@ export class userValidator {
           "one lowercase letter, and one number or special character",
       })
       .required(),
-  });
-
-  public static schemaVerifyEmail = Joi.object({
-    token: Joi.string().required(),
-    isVerified: Joi.boolean().required(),
   });
 
   public static schemaChangePassword = Joi.object({

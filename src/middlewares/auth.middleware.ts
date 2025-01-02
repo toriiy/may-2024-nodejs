@@ -3,7 +3,6 @@ import { NextFunction, Request, Response } from "express";
 import { ActionTokenTypeEnum } from "../enums/action-token-type.enum";
 import { TokenTypeEnum } from "../enums/token-type.enum";
 import { ApiError } from "../errors/api.error";
-import { ISetForgotPassword, IVerifyEmail } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { tokenService } from "../services/token.service";
@@ -73,15 +72,23 @@ class AuthMiddleware {
   public checkActionToken(tokenType: ActionTokenTypeEnum) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const body = req.body as ISetForgotPassword | IVerifyEmail;
-        const payload = tokenService.validateToken(body.token, tokenType);
+        const header = req.headers.authorization;
+        if (!header) {
+          throw new ApiError("No action token provided", 401);
+        }
+        const actionToken = header.split("Bearer ")[1];
+        if (!actionToken) {
+          throw new ApiError("No action token provided", 401);
+        }
+        const payload = tokenService.validateToken(actionToken, tokenType);
         const entity = await actionTokenRepository.findByParams({
-          token: body.token,
+          token: actionToken,
         });
         if (!entity) {
           throw new ApiError("Invalid token", 401);
         }
         req.res.locals.payload = payload;
+        req.res.locals.actionToken = actionToken;
         next();
       } catch (e) {
         next(e);

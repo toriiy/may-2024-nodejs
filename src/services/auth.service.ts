@@ -9,9 +9,9 @@ import {
   ISetForgotPassword,
   IUser,
   IUserIncomplete,
-  IVerifyEmail,
 } from "../interfaces/user.interface";
 import { actionTokenRepository } from "../repositories/action-token.repository";
+import { passwordRepository } from "../repositories/password.repository";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { emailService } from "./email.service";
@@ -29,6 +29,7 @@ class AuthService {
       role: user.role,
     });
     await tokenRepository.create({ ...tokens, _userId: user._id });
+    await passwordRepository.create({ _userId: user._id, password });
     const token = tokenService.generateActionToken(
       {
         userId: user._id,
@@ -127,24 +128,39 @@ class AuthService {
   public async SetForgotPassword(
     payload: ITokenPayload,
     body: ISetForgotPassword,
+    actionToken: string,
   ): Promise<void> {
     const password = await passwordService.hashPassword(body.password);
+    const passwords = await passwordRepository.findById(payload.userId);
+    for (const item of passwords) {
+      const doesPasswordExist = await passwordService.comparePassword(
+        body.password,
+        item.password,
+      );
+      if (doesPasswordExist) {
+        throw new ApiError("Your new password has to be unique", 400);
+      }
+    }
+    await passwordRepository.create({
+      _userId: payload.userId,
+      password,
+    });
     await userRepository.updateMe(payload.userId, { password });
 
     await Promise.all([
-      actionTokenRepository.deleteByParams({ token: body.token }),
+      actionTokenRepository.deleteByParams({ token: actionToken }),
       tokenRepository.deleteAll(payload.userId),
     ]);
   }
 
   public async verifyEmail(
     payload: ITokenPayload,
-    body: IVerifyEmail,
+    actionToken: string,
   ): Promise<void> {
     await userRepository.updateMe(payload.userId, {
-      isVerified: body.isVerified,
+      isVerified: true,
     });
-    await actionTokenRepository.deleteByParams({ token: body.token });
+    await actionTokenRepository.deleteByParams({ token: actionToken });
   }
 
   public async changePassword(
@@ -160,6 +176,20 @@ class AuthService {
       throw new ApiError("Password is incorrect", 400);
     }
     const password = await passwordService.hashPassword(body.newPassword);
+    const passwords = await passwordRepository.findById(payload.userId);
+    for (const item of passwords) {
+      const doesPasswordExist = await passwordService.comparePassword(
+        body.newPassword,
+        item.password,
+      );
+      if (doesPasswordExist) {
+        throw new ApiError("Your new password has to be unique", 400);
+      }
+    }
+    await passwordRepository.create({
+      _userId: payload.userId,
+      password,
+    });
     await userRepository.updateMe(payload.userId, { password });
     await tokenRepository.deleteAll(payload.userId);
   }

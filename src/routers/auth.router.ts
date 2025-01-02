@@ -57,7 +57,6 @@ router.put(
 router.put(
   "/verify-email",
   authMiddleware.checkActionToken(ActionTokenTypeEnum.EMAIL_VERIFICATION),
-  commonMiddleware.isBodyValid(userValidator.schemaVerifyEmail),
   authController.verifyEmail,
 );
 
