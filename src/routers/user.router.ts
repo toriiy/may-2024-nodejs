@@ -20,6 +20,13 @@ router.put(
   userController.updateMe,
 );
 
+router.post(
+  "/me/avatar",
+  authMiddleware.checkAccessToken,
+  // fileMiddleware.isFileValid(),
+  userController.uploadAvatar,
+);
+
 router.get(
   "/:userId",
   commonMiddleware.isIdValid("userId"),

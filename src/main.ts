@@ -1,4 +1,5 @@
 import express, { NextFunction, Request, Response } from "express";
+import expressFileUpload from "express-fileupload";
 import * as mongoose from "mongoose";
 
 import { config } from "./configs/config";
@@ -10,6 +11,7 @@ import { userRouter } from "./routers/user.router";
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(expressFileUpload());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello world");

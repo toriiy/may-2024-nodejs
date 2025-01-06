@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from "express";
+import { UploadedFile } from "express-fileupload";
 
 import { ITokenPayload } from "../interfaces/token.interface";
 import { IUserIncomplete } from "../interfaces/user.interface";
@@ -40,6 +41,17 @@ class UserController {
       const body = req.body as IUserIncomplete;
       const user = await userService.updateMe(tokenPayload, body);
       res.status(201).json(user);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async uploadAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
+      const file = req.files?.avatar as UploadedFile;
+      const result = await userService.uploadAvatar(tokenPayload, file);
+      res.status(201).json(result);
     } catch (e) {
       next(e);
     }
