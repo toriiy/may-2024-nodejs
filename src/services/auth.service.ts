@@ -138,7 +138,7 @@ class AuthService {
         item.password,
       );
       if (doesPasswordExist) {
-        throw new ApiError("Your new password has to be unique", 400);
+        throw new ApiError("Your new password has to be unique", 409);
       }
     }
     await passwordRepository.create({
@@ -183,7 +183,7 @@ class AuthService {
         item.password,
       );
       if (doesPasswordExist) {
-        throw new ApiError("Your new password has to be unique", 400);
+        throw new ApiError("Your new password has to be unique", 409);
       }
     }
     await passwordRepository.create({

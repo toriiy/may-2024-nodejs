@@ -52,10 +52,16 @@ class UserService {
       user._id,
     );
     const updatedUser = await userRepository.updateMe(user._id, { avatar });
-    // if (user.avatar){
-    //   // await s3Service.deleteFile(user.avatar)
-    // }
+    if (user.avatar) {
+      await s3Service.deleteFile(user.avatar);
+    }
     return updatedUser;
+  }
+
+  public async deleteAvatar(tokenPayload: ITokenPayload) {
+    const user = await userRepository.getById(tokenPayload.userId);
+    await s3Service.deleteFile(user.avatar);
+    await userRepository.updateMe(user._id, { avatar: "" });
   }
 
   public async getById(userId: string): Promise<IUser> {

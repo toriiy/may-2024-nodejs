@@ -3,6 +3,7 @@ import { UploadedFile } from "express-fileupload";
 
 import { ITokenPayload } from "../interfaces/token.interface";
 import { IUserIncomplete } from "../interfaces/user.interface";
+import { userPresenter } from "../presenters/user.presenter";
 import { userService } from "../services/user.service";
 
 class UserController {
@@ -19,7 +20,8 @@ class UserController {
     try {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
       const result = await userService.getMe(tokenPayload);
-      res.json(result);
+      const response = userPresenter.toResponse(result);
+      res.json(response);
     } catch (e) {
       next(e);
     }
@@ -39,8 +41,9 @@ class UserController {
     try {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
       const body = req.body as IUserIncomplete;
-      const user = await userService.updateMe(tokenPayload, body);
-      res.status(201).json(user);
+      const result = await userService.updateMe(tokenPayload, body);
+      const response = userPresenter.toResponse(result);
+      res.status(201).json(response);
     } catch (e) {
       next(e);
     }
@@ -51,7 +54,18 @@ class UserController {
       const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
       const file = req.files?.avatar as UploadedFile;
       const result = await userService.uploadAvatar(tokenPayload, file);
-      res.status(201).json(result);
+      const response = userPresenter.toResponse(result);
+      res.status(201).json(response);
+    } catch (e) {
+      next(e);
+    }
+  }
+
+  public async deleteAvatar(req: Request, res: Response, next: NextFunction) {
+    try {
+      const tokenPayload = req.res.locals.tokenPayload as ITokenPayload;
+      await userService.deleteAvatar(tokenPayload);
+      res.sendStatus(204);
     } catch (e) {
       next(e);
     }
@@ -61,7 +75,8 @@ class UserController {
     try {
       const userId = req.params.userId;
       const result = await userService.getById(userId);
-      res.json(result);
+      const response = userPresenter.toResponse(result);
+      res.json(response);
     } catch (e) {
       next(e);
     }
