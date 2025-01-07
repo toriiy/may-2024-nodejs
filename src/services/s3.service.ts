@@ -52,7 +52,7 @@ class S3Service {
     return `${itemType}/${itemId}/${randomUUID()}${path.extname(fileName)}`; // use only template string
   }
 
-  public async deleteFile(key: string) {
+  public async deleteFile(key: string): Promise<void> {
     try {
       await this.client.send(
         new DeleteObjectCommand({
