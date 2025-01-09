@@ -62,7 +62,7 @@ class AuthService {
       user.password,
     );
     if (!isPasswordCorrect) {
-      throw new ApiError("invalid email or password", 401);
+      throw new ApiError("invalid email or password", 400);
     }
     const tokens = tokenService.generateToken({
       userId: user._id,

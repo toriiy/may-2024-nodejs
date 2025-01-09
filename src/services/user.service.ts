@@ -3,14 +3,21 @@ import { UploadedFile } from "express-fileupload";
 import { FileItemTypeEnum } from "../enums/file-item-type.enum";
 import { ApiError } from "../errors/api.error";
 import { ITokenPayload } from "../interfaces/token.interface";
-import { IUser, IUserIncomplete } from "../interfaces/user.interface";
+import {
+  IUser,
+  IUserIncomplete,
+  IUserListQuery,
+  IUserListResponse,
+} from "../interfaces/user.interface";
+import { userPresenter } from "../presenters/user.presenter";
 import { tokenRepository } from "../repositories/token.repository";
 import { userRepository } from "../repositories/user.repository";
 import { s3Service } from "./s3.service";
 
 class UserService {
-  public async getList(): Promise<IUser[]> {
-    return await userRepository.getList();
+  public async getList(query: IUserListQuery): Promise<IUserListResponse> {
+    const { entities, total } = await userRepository.getList(query);
+    return userPresenter.toResponseList(entities, total, query);
   }
 
   public async getMe(tokenPayload: ITokenPayload): Promise<IUser> {
@@ -60,8 +67,10 @@ class UserService {
 
   public async deleteAvatar(tokenPayload: ITokenPayload): Promise<void> {
     const user = await userRepository.getById(tokenPayload.userId);
-    await s3Service.deleteFile(user.avatar);
-    await userRepository.updateMe(user._id, { avatar: "" });
+    if (user.avatar) {
+      await s3Service.deleteFile(user.avatar);
+      await userRepository.updateMe(user._id, { avatar: null });
+    }
   }
 
   public async getById(userId: string): Promise<IUser> {

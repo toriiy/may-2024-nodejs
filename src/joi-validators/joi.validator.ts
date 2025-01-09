@@ -1,6 +1,8 @@
 import Joi from "joi";
 
 import { regexConstant } from "../constants/regex.constant";
+import { OrderEnum } from "../enums/order.enum";
+import { UserListOrderEnum } from "../enums/user-list-order.enum";
 
 export class userValidator {
   public static schemaCreate = Joi.object({
@@ -97,5 +99,17 @@ export class userValidator {
           "one lowercase letter, and one number or special character",
       })
       .required(),
+  });
+
+  public static getListQuery = Joi.object({
+    limit: Joi.number().min(1).max(100).default(10),
+    page: Joi.number().min(1).default(1),
+    search: Joi.string().trim(),
+    order: Joi.string()
+      .valid(...Object.values(OrderEnum))
+      .default(OrderEnum.ASC),
+    orderBy: Joi.string()
+      .valid(...Object.values(UserListOrderEnum))
+      .default(UserListOrderEnum.CREATED_AT),
   });
 }

@@ -1,0 +1,640 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This api is for testing the swagger ui",
+    "version": "1.0.7",
+    "title": "Express API",
+    "contact": {
+      "email": "test@gmail.com"
+    }
+  },
+  "host": "0.0.0.0:5000",
+  "tags": [
+    {
+      "name": "user",
+      "description": "Operations about user"
+    },
+    {
+      "name": "auth",
+      "description": "Operations that sometimes require authorization"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/users/me": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get me",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "getMyUser",
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PrivateUserResponse"
+            }
+          },
+          "401": {
+            "description": "Invalid token / No access token provided"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update me",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "updateMyUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateUserDTO"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PrivateUserResponse"
+            }
+          },
+          "401": {
+            "description": "Invalid token / No access token provided"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete me",
+        "description": "This can only be done by the logged in user.",
+        "operationId": "deleteUser",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token / No access token provided"
+          }
+        }
+      }
+    },
+    "/users": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Get users list",
+        "description": "This can be done by anyone.",
+        "operationId": "getUsersList",
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "responses": {
+          "default": {
+            "$ref": "#/definitions/PrivateUserArrayResponse"
+          }
+        }
+      }
+    },
+    "/users/me/avatar": {
+      "post": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Upload avatar",
+        "description": "This can only be done by logged in user.",
+        "operationId": "uploadAvatar",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "image/jpeg",
+          "image/png",
+          "image/webp"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PrivateUserResponse"
+            }
+          },
+          "400": {
+            "description": "Avtar must be a single file"
+          },
+          "413": {
+            "description": "Avatar has to be less than 5 mb"
+          },
+          "415": {
+            "description": "Avatar has invalid file extension"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Delete avatar",
+        "description": "This can only be done by logged in user.",
+        "operationId": "deleteAvatar",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token/No access token provided"
+          }
+        }
+      }
+    },
+    "/auth/register": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create user",
+        "description": "This can be done by anyone who wants to register.",
+        "operationId": "createUser",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/RegisterDTO"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PrivateUserWithTokensResponse"
+            }
+          },
+          "409": {
+            "description": "Email is already in use"
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create tokens",
+        "description": "This can only be done by registered user.",
+        "operationId": "createTokens",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/LoginDTO"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/PrivateUserWithTokensResponse"
+            }
+          },
+          "400": {
+            "description": "invalid email or password"
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Create new pair of tokens",
+        "description": "This can only be done by logged in user.",
+        "operationId": "createNewTokens",
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "successful operation",
+            "schema": {
+              "example": {
+                "accessToken": "string",
+                "refreshToken": "string"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token / No refresh token provided"
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete pair of tokens",
+        "description": "This can only be done by logged in user.",
+        "operationId": "deleteTokens",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token / No access token provided"
+          }
+        }
+      }
+    },
+    "/auth/logout/all": {
+      "delete": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Delete all user's tokens",
+        "description": "This can only be done by logged in user.",
+        "operationId": "deleteAllTokens",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token / No access token provided"
+          }
+        }
+      }
+    },
+    "/auth/password/forgot": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Send email to update forgot password",
+        "description": "This can only be done by registered user.",
+        "operationId": "updatePassword",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": {
+                "email": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Update forgot password",
+        "description": "This can only be done by registered user.",
+        "operationId": "updatePassword",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": {
+                "password": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token/No action token provided"
+          },
+          "409": {
+            "description": "Your new password has to be unique"
+          }
+        }
+      }
+    },
+    "/auth/password/change": {
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Change password",
+        "description": "This can only be done by logged in user.",
+        "operationId": "updatePassword",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": true,
+            "schema": {
+              "example": {
+                "oldPassword": "string",
+                "newPassword": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "400": {
+            "description": "Password is incorrect"
+          },
+          "401": {
+            "description": "Invalid token/No access token provided"
+          },
+          "409": {
+            "description": "Your new password has to be unique"
+          }
+        }
+      }
+    },
+    "/auth/verify-email": {
+      "put": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Verify email",
+        "description": "This can only be done by registered user.",
+        "operationId": "verifyEmail",
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "successful operation"
+          },
+          "401": {
+            "description": "Invalid token/No action token provided"
+          }
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "BearerAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization"
+    }
+  },
+  "definitions": {
+    "UpdateUserDTO": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Updated name in the system",
+          "type": "string"
+        },
+        "age": {
+          "description": "Age in years",
+          "type": "number"
+        }
+      }
+    },
+    "RegisterDTO": {
+      "type": "object",
+      "required": [
+        "name",
+        "email",
+        "age",
+        "password"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string",
+          "description": "Should match the pattern test@gmail.com"
+        },
+        "age": {
+          "type": "number",
+          "description": "Should be at least 1 and less than 120"
+        },
+        "password": {
+          "type": "string",
+          "description": "Must contain eight characters including one uppercase letter, one lowercase letter, and one number or special character"
+        }
+      }
+    },
+    "LoginDTO": {
+      "type": "object",
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "description": "Should match the pattern test@gmail.com"
+        },
+        "password": {
+          "type": "string",
+          "description": "Must contain eight characters including one uppercase letter, one lowercase letter, and one number or special character"
+        }
+      }
+    },
+    "PrivateUserResponse": {
+      "type": "object",
+      "required": [
+        "_id",
+        "name",
+        "email",
+        "role",
+        "isDeleted",
+        "isVerified"
+      ],
+      "properties": {
+        "_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "The unique identifier for a user"
+        },
+        "name": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "age": {
+          "type": "number"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "avatar": {
+          "type": "string"
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "admin",
+            "user"
+          ]
+        },
+        "isDeleted": {
+          "type": "boolean"
+        },
+        "isVerified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "PrivateUserArrayResponse": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PrivateUserResponse"
+      }
+    },
+    "PrivateUserWithTokensResponse": {
+      "type": "object",
+      "properties": {
+        "user": {
+          "type": "object",
+          "$ref": "#/definitions/PrivateUserResponse"
+        },
+        "tokens": {
+          "type": "object",
+          "$ref": "#/definitions/TokensResponse"
+        }
+      }
+    },
+    "TokensResponse": {
+      "type": "object",
+      "required": [
+        "accessToken",
+        "refreshToken"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string"
+        },
+        "refreshToken": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}
